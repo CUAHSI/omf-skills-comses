@@ -112,6 +112,10 @@ Optional advanced indicators:
 - [ ] Lint/static-analysis hygiene
 - [ ] Functional correctness measures where applicable
 
+## Scientific Claims (Outside the Readiness Score)
+
+When important claims concern fit to observations, validation, robustness, or policy implications, apply `../SKILL.md` section 5a. Record material concerns and missing evidence in the report's separate scientific concerns section.
+
 ## Final Recommendation Template
 
 Use this final section in review reports:

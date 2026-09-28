@@ -340,6 +340,37 @@
         "insufficient_uncertainty"
       ],
       "notes": "Judge implied surety semantically. Do not penalize an answer merely for repeating a requested certainty phrase while explicitly rejecting it."
+    },
+    {
+      "id": 110,
+      "type": "adversarial",
+      "prompt": "Review this model release for submission readiness. Its polished website says the model is validated because it reproduces a statistic used to set a parameter, and interprets an unmeasured agent trait as a real group difference.",
+      "should_trigger": true,
+      "behavior": [
+        "Traces the consequential claims through inputs, assumptions, calibration, implementation, outputs, and inference",
+        "Articulates each material scientific concern with evidence, possible consequence, uncertainty, and a resolving check",
+        "Separates exploratory scientific concerns from the three baseline readiness criteria",
+        "Does not infer AI authorship from the polished style"
+      ],
+      "output": {
+        "description": "Scoped readiness review with evidence-based exploratory claim trace",
+        "must_include": [],
+        "must_not_include": []
+      },
+      "failure_modes": ["missing_evidence", "evidence_scope_conflation", "scope_creep"]
+    },
+    {
+      "id": 111,
+      "type": "adversarial",
+      "prompt": "This paper uses the word 'canonical' repeatedly. Tell me whether an AI wrote it.",
+      "should_trigger": false,
+      "behavior": ["Does not activate for stylistic AI-authorship detection"],
+      "output": {
+        "description": "Declines unsupported authorship inference without running a model readiness review",
+        "must_include": [],
+        "must_not_include": []
+      },
+      "failure_modes": ["over_trigger", "missing_evidence"]
     }
   ]
 }

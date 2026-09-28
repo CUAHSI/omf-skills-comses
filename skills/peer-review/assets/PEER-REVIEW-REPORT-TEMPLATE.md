@@ -61,6 +61,16 @@ Notes:
 - Minor issues:
 - Advisory improvements:
 
+## Scientific Concerns (when relevant)
+
+For each material concern, state:
+
+- The claim and where it appears
+- The evidence that raises the concern and how it could affect the conclusion
+- What remains uncertain and what evidence would help resolve it
+
+Keep these concerns separate from the readiness score. Say when evidence was unavailable, and distinguish questions from demonstrated flaws.
+
 ## Final Recommendation
 
 - Decision: Pass | Fail

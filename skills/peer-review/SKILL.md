@@ -27,7 +27,7 @@ metadata:
 - **Authority:** Review criteria, evidence assessment, scoring, finding severity, and readiness recommendation.
 - **Preconditions:** An identifiable review target, declared review scope, available evidence, and explicit handling of inaccessible essentials.
 - **Effects:** Produce findings and reports under `omf-artifacts/review/` when persisted; do not modify assessed artifacts unless remediation is separately authorized.
-- **Invariants:** Preserve observed evidence, distinguish not-assessable from failure, and apply the published scoring rule consistently.
+- **Invariants:** Preserve observed evidence, distinguish not-assessable from failure, apply the published scoring rule consistently, and never infer AI authorship from prose style.
 - **Outputs:** Binary recommendation, criterion-level ratings, evidence, prioritized findings, and remediation routes.
 - **Handoffs:** Route fixes to the affected artifact owner, passing the criterion, evidence, severity, and expected verification; continue independent review where possible.
 - **Completion:** Every in-scope criterion has a rating or explicit not-assessable basis and the final recommendation follows the scoring rule.
@@ -43,7 +43,7 @@ Use this skill when:
 - A team wants to identify blockers to frictionless reuse of a model by third parties
 - A repository needs a structured research software engineering quality assessment
 
-Do not use this skill to judge scientific novelty, theoretical validity, or whether conclusions are correct.
+Do not use this skill to decide scientific novelty, theoretical validity, or whether conclusions are correct. Report material scientific concerns separately when the available evidence supports them.
 Its binary recommendation reports whether three named submission criteria were
 observed as satisfied from available evidence; it is not scientific
 certification or a guarantee of reproducibility in untested conditions.
@@ -171,6 +171,12 @@ Policy note:
 
 - Tests and CI findings are **Major** quality signals but **nonblocking** for the binary pass/fail decision, unless they directly cause one of the three baseline review criteria to fail (for example, inability to execute reproducibly).
 
+### 5a. Check important scientific claims
+
+When a submission claims empirical fit, validation, robustness, or a policy implication, follow its important claims from observed data through assumptions, parameter choices, code, results, and conclusions. Ask whether a result was built into a rule, whether a validation target was also used for calibration, and whether an unmeasured model variable is being described as a real population trait. Separate checks that the code runs as intended from tests against independent observations.
+
+If this reveals a material concern, report the claim and source, the evidence behind the concern, how it could affect the conclusion, what is uncertain, and what would resolve it. Keep scientific concerns outside the three-criterion readiness score. A concrete documentation defect, such as an undisclosed assumption or a calibration result called validation, may affect the documentation rating. Refer questions about scientific validity to a domain reviewer. Apply the same scrutiny regardless of authorship; writing style alone establishes neither AI involvement nor error.
+
 ### 6. Synthesize Recommendation
 
 Produce:
@@ -182,7 +188,7 @@ Produce:
   - Minor
   - Advisory
 - Actionable remediation plan with smallest viable next steps
-- Explicit statement that scientific merit is out of scope unless reviewer chooses to add private concerns
+- Separate scientific concerns, when found, from the readiness decision
 
 Decision logic:
 
@@ -206,7 +212,6 @@ When a user asks for an author revision plan or response checklist, convert find
 - Inline comments are not a substitute for narrative model documentation.
 - Reviewers often over-focus style and under-focus runnability; keep execution and replication central.
 - Missing tests should not automatically fail a model if execution and documentation are excellent, but should be flagged as risk.
-- Avoid judging scientific conclusions in this workflow; keep scope to software and documentation readiness.
 
 ## Templates & Resources
 
