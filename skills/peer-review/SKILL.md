@@ -2,7 +2,8 @@
 name: peer-review
 description: |
   Evaluate computational model submissions for OMF peer review readiness using
-  reproducibility, documentation, code quality, and research software engineering criteria.
+  reproducibility, documentation, code quality, and research software engineering criteria,
+  with a separate baseline appraisal of support for important scientific claims.
 
   Use this skill whenever a user asks to review a computational model, codebase, model release,
   or submission package for publication, reuse, or peer review. Trigger on phrases like:
@@ -11,8 +12,8 @@ description: |
 
   Expected output: structured peer review report with a binary recommendation
   limited to named baseline submission criteria, criterion-by-criterion findings,
-  prioritized fixes, and an evidence-based checklist mapped to those criteria and
-  key EVERSE research software quality indicators.
+  prioritized fixes, a separate assessment of scientific claim support, and an
+  evidence-based checklist mapped to key EVERSE research software quality indicators.
 license: MIT
 compatibility: Works with Python, R, NetLogo, Julia, C/C++, and mixed-language model repositories
 metadata:
@@ -23,14 +24,14 @@ metadata:
 
 ## Skill Contract
 
-- **Activation:** Computational-model submission, release, repository, reproducibility, or research-software readiness review; not scientific novelty adjudication or silent remediation.
+- **Activation:** Computational-model submission, release, repository, reproducibility, or research-software readiness review; not novelty adjudication or silent remediation.
 - **Authority:** Review criteria, evidence assessment, scoring, finding severity, and readiness recommendation.
 - **Preconditions:** An identifiable review target, declared review scope, available evidence, and explicit handling of inaccessible essentials.
 - **Effects:** Produce findings and reports under `omf-artifacts/review/` when persisted; do not modify assessed artifacts unless remediation is separately authorized.
 - **Invariants:** Preserve observed evidence, distinguish not-assessable from failure, apply the published scoring rule consistently, and never infer AI authorship from prose style.
-- **Outputs:** Binary recommendation, criterion-level ratings, evidence, prioritized findings, and remediation routes.
+- **Outputs:** Binary CoMSES-criteria recommendation, separate scientific claim assessment, criterion-level ratings, evidence, prioritized findings, and remediation routes.
 - **Handoffs:** Route fixes to the affected artifact owner, passing the criterion, evidence, severity, and expected verification; continue independent review where possible.
-- **Completion:** Every in-scope criterion has a rating or explicit not-assessable basis and the final recommendation follows the scoring rule.
+- **Completion:** Every in-scope CoMSES criterion and central scientific claim has an evidence-based rating or an explicit not-assessable basis; the binary recommendation follows the three-criterion scoring rule.
 - **Failure:** Issue a constrained review when evidence is missing and never infer a pass from absence of evidence.
 - **Provenance:** Record persisted review reports and review assertions as immutable activities without rewriting earlier findings or dispositions.
 
@@ -43,11 +44,7 @@ Use this skill when:
 - A team wants to identify blockers to frictionless reuse of a model by third parties
 - A repository needs a structured research software engineering quality assessment
 
-Do not use this skill to decide scientific novelty, theoretical validity, or whether conclusions are correct. Report material scientific concerns separately when the available evidence supports them.
-Its binary recommendation reports whether three named submission criteria were
-observed as satisfied from available evidence; it is not scientific
-certification or a guarantee of reproducibility in untested conditions.
-Focus on software and documentation quality for reproducibility and reuse.
+Assess how well the available evidence supports the model's important scientific claims, including sensitivity to consequential assumptions where appropriate. Do not judge novelty or certify a model as scientifically valid. The binary recommendation covers only the three published CoMSES submission criteria; present scientific support separately.
 
 ## Key Inputs
 
@@ -59,6 +56,7 @@ Gather as many of these as available:
 - Example input data and expected outputs
 - Release metadata (license, citation, version, archive links)
 - Tests, CI configuration, and issue tracker information
+- Stated scientific claims, empirical sources, calibration choices, validation evidence, and sensitivity analyses
 
 ## Review Workflow
 
@@ -74,6 +72,7 @@ Apply these rules before synthesizing any final decision:
   - **Pass:** all three baseline review criteria are rated Pass
   - **Fail:** any one of the three baseline review criteria is rated Partial or Fail
 - Research software quality indicators support evidence and prioritization, but do not override required-criteria failures.
+- Scientific claim support is a separate assessment and does not change the three-criterion CoMSES score.
 
 ### 1. Scope and Submission Triage
 
@@ -82,7 +81,7 @@ Apply these rules before synthesizing any final decision:
    - Repository plus release package
    - Repository plus manuscript supplement
 2. Confirm review scope:
-  - Baseline OMF peer review readiness
+   - Baseline OMF peer review readiness
    - Expanded RSE quality assessment
 3. Record missing essentials up front (for example missing run instructions, missing docs, private dependencies).
 
@@ -171,24 +170,26 @@ Policy note:
 
 - Tests and CI findings are **Major** quality signals but **nonblocking** for the binary pass/fail decision, unless they directly cause one of the three baseline review criteria to fail (for example, inability to execute reproducibly).
 
-### 5a. Check important scientific claims
+### 5a. Assess support for scientific claims
 
-When a submission claims empirical fit, validation, robustness, or a policy implication, follow its important claims from observed data through assumptions, parameter choices, code, results, and conclusions. Ask whether a result was built into a rule, whether a validation target was also used for calibration, and whether an unmeasured model variable is being described as a real population trait. Separate checks that the code runs as intended from tests against independent observations.
+Identify the model's purpose and central scientific claims. For each, follow observed data through assumptions, calibration, code, outputs, and inference. Distinguish results built into rules from results that arise from the model. Check whether claimed validation uses evidence independent of calibration, whether unmeasured model variables are treated as observed traits, and whether conclusions stay within the model's stated scope. For conceptual models, assess support for their stated purpose without demanding empirical fit they do not claim.
 
-If this reveals a material concern, report the claim and source, the evidence behind the concern, how it could affect the conclusion, what is uncertain, and what would resolve it. Keep scientific concerns outside the three-criterion readiness score. A concrete documentation defect, such as an undisclosed assumption or a calibration result called validation, may affect the documentation rating. Refer questions about scientific validity to a domain reviewer. Apply the same scrutiny regardless of authorship; writing style alone establishes neither AI involvement nor error.
+Assess whether sensitivity analysis is adequate for the claims: does it vary the uncertain inputs or structural assumptions that could change the main conclusion, over justified ranges, with stochastic variation and interactions considered where relevant? A fixed-seed rerun, numerical convergence check, or sweep of a peripheral parameter cannot by itself establish robustness. If sensitivity analysis is unnecessary, explain why; if needed but missing or too narrow, state which claim remains weakly supported and what test would help. Match the depth of review to the model's purpose and the consequences of error.
+
+For each central claim, rate support as **Supported within tested scope** (the evidence addresses the claim as stated), **Qualified** (support depends on important unresolved assumptions or narrow tests), **Not supported by available evidence** (the cited evidence does not establish the claim), or **Not assessable** (essential material is unavailable). Give the basis and limits of each rating. State material concerns, their possible effect on the inference, and what would resolve them. A concrete documentation defect may also affect the documentation rating. Keep claim ratings outside the CoMSES score and seek domain review when specialized expertise is needed. Apply the same scrutiny regardless of authorship; writing style alone establishes neither AI involvement nor error.
 
 ### 6. Synthesize Recommendation
 
 Produce:
 
-- Overall recommendation: binary **Pass** or **Fail**
+- CoMSES readiness recommendation: binary **Pass** or **Fail**
 - Severity-ranked findings:
   - Blocker
   - Major
   - Minor
   - Advisory
 - Actionable remediation plan with smallest viable next steps
-- Separate scientific concerns, when found, from the readiness decision
+- Separate scientific claim assessment from the CoMSES readiness decision
 
 Decision logic:
 
@@ -212,6 +213,7 @@ When a user asks for an author revision plan or response checklist, convert find
 - Inline comments are not a substitute for narrative model documentation.
 - Reviewers often over-focus style and under-focus runnability; keep execution and replication central.
 - Missing tests should not automatically fail a model if execution and documentation are excellent, but should be flagged as risk.
+- A CoMSES pass does not establish scientific support; assess the central claims separately and report limits of the evidence.
 
 ## Templates & Resources
 
@@ -224,6 +226,8 @@ When a user asks for an author revision plan or response checklist, convert find
 - Repository-local refresh workflow: `.github/skills/update-skill/SKILL.md`
 - ODD completeness checks: `../document/references/ODD-CHECKLIST.md` via the `document` skill when ODD is in scope
 - Review criteria reference: https://www.comses.net/reviews/
+- Scientific review context: https://www.jasss.org/23/2/7.html
+- Sensitivity review context: https://www.epa.gov/sites/default/files/2015-04/documents/cred_guidance_0309.pdf
 - EVERSE indicators reference: https://everse.software/indicators/website/indicators.html
 
 ## Example

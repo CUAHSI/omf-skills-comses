@@ -61,17 +61,16 @@ Notes:
 - Minor issues:
 - Advisory improvements:
 
-## Scientific Concerns (when relevant)
+## Scientific Claim Support
 
-For each material concern, state:
+State the model's purpose. For each central claim, give its source, a support rating (**Supported within tested scope | Qualified | Not supported by available evidence | Not assessable**), the evidence behind that rating, and its limits. Distinguish empirical inputs, assumptions, calibration targets, model results, and independent checks.
 
-- The claim and where it appears
-- The evidence that raises the concern and how it could affect the conclusion
-- What remains uncertain and what evidence would help resolve it
+- Sensitivity analysis: Which uncertain inputs or model choices were varied, over what ranges, and did the main conclusion change? If none was needed, explain why. If needed but missing or too narrow, name the claim affected.
+- Material concerns and next checks: State the possible effect on the conclusion, what remains uncertain, and what evidence would help resolve it.
 
-Keep these concerns separate from the readiness score. Say when evidence was unavailable, and distinguish questions from demonstrated flaws.
+Keep this assessment separate from the CoMSES readiness score. Say when evidence was unavailable, and distinguish questions from demonstrated flaws.
 
-## Final Recommendation
+## CoMSES Readiness Recommendation
 
 - Decision: Pass | Fail
 - Rationale:
@@ -80,5 +79,4 @@ Keep these concerns separate from the readiness score. Say when evidence was una
 
 ## Scope Boundary Reminder
 
-This report evaluates software and documentation quality for reproducibility and reuse.
-Do not score scientific novelty or theoretical validity as part of the final recommendation.
+The binary recommendation evaluates the three published CoMSES criteria. The scientific claim assessment reports support within the evidence reviewed; it is not a certification of scientific validity.

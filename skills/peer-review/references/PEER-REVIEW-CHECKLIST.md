@@ -112,9 +112,9 @@ Optional advanced indicators:
 - [ ] Lint/static-analysis hygiene
 - [ ] Functional correctness measures where applicable
 
-## Scientific Claims (Outside the Readiness Score)
+## Scientific Claim Support (Separate from CoMSES Score)
 
-When important claims concern fit to observations, validation, robustness, or policy implications, apply `../SKILL.md` section 5a. Record material concerns and missing evidence in the report's separate scientific concerns section.
+Apply `../SKILL.md` section 5a to central claims. Record the purpose, evidence behind each claim, the role of assumptions and calibration, and whether the inference follows from the results. Assess sensitivity of the main conclusion to consequential uncertain inputs and structural choices when relevant; state why it is unnecessary otherwise. Rate claim support separately from the three CoMSES criteria and identify missing evidence or domain expertise.
 
 ## Final Recommendation Template
 
@@ -127,4 +127,4 @@ Use this final section in review reports:
 
 ## Scope Boundary Reminder
 
-Review quality and reuse readiness of software and documentation. Do not score scientific novelty or validity of scientific conclusions in this workflow.
+The binary decision follows the three published CoMSES criteria. Scientific claim support is an additional, separately reported assessment; neither a CoMSES pass nor a claim-support rating certifies scientific validity.

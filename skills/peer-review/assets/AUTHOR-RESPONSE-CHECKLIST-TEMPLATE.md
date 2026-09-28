@@ -24,6 +24,12 @@ Use this template to convert a peer-review report into a concise action plan for
   - Evidence to provide:
   - Done when:
 
+## Scientific Evidence Follow-Up (Separate from CoMSES Pass)
+
+- [ ] Action needed to support or qualify a central claim
+  - Evidence to provide:
+  - Done when:
+
 ## Resubmission Readiness Check
 
 - [ ] Ease of Execution passes
@@ -37,4 +43,4 @@ Use this template to convert a peer-review report into a concise action plan for
 - Keep each action scoped to one concrete change.
 - Merge duplicate findings.
 - Keep tests and CI as Major but nonblocking unless they directly impact a required criterion.
-- Exclude scientific novelty/theory disputes from checklist items.
+- Carry forward actionable gaps in claim support without presenting them as CoMSES pass requirements. Leave novelty judgments to the relevant domain review.

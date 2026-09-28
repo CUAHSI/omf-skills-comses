@@ -349,11 +349,11 @@
       "behavior": [
         "Traces the consequential claims through inputs, assumptions, calibration, implementation, outputs, and inference",
         "Articulates each material scientific concern with evidence, possible consequence, uncertainty, and a resolving check",
-        "Separates exploratory scientific concerns from the three baseline readiness criteria",
+        "Rates support for the central claims separately from the three CoMSES readiness criteria",
         "Does not infer AI authorship from the polished style"
       ],
       "output": {
-        "description": "Scoped readiness review with evidence-based exploratory claim trace",
+        "description": "Scoped readiness review with separate evidence-based scientific claim assessment",
         "must_include": [],
         "must_not_include": []
       },
@@ -371,6 +371,40 @@
         "must_not_include": []
       },
       "failure_modes": ["over_trigger", "missing_evidence"]
+    },
+    {
+      "id": 112,
+      "type": "adversarial",
+      "prompt": "Review my policy simulation. The headline effect depends on an assumed appeal rate, but the only robustness check changes the random seed. Is it ready for CoMSES review, and how well is the policy claim supported?",
+      "should_trigger": true,
+      "behavior": [
+        "Keeps the three-criterion CoMSES recommendation separate from scientific claim support",
+        "Explains that changing a seed does not test sensitivity to the assumed appeal rate",
+        "Identifies a justified range and outcome comparison needed to assess the claim"
+      ],
+      "output": {
+        "description": "Separate readiness decision and qualified scientific support assessment",
+        "must_include": [],
+        "must_not_include": []
+      },
+      "failure_modes": ["missing_step", "evidence_scope_conflation", "insufficient_uncertainty"]
+    },
+    {
+      "id": 113,
+      "type": "adversarial",
+      "prompt": "Review this minimal theoretical model for publication readiness. It makes no claim to fit a real population and proves its central result analytically. Should it fail because it has no empirical calibration or large parameter sweep?",
+      "should_trigger": true,
+      "behavior": [
+        "Assesses the theoretical claim against its stated purpose and available analytical evidence",
+        "Does not require empirical calibration or a parameter sweep without a claim-specific reason",
+        "Explains when sensitivity analysis is unnecessary"
+      ],
+      "output": {
+        "description": "Purpose-sensitive scientific appraisal alongside the CoMSES readiness review",
+        "must_include": [],
+        "must_not_include": []
+      },
+      "failure_modes": ["scope_creep", "invalid_output", "missing_evidence"]
     }
   ]
 }
