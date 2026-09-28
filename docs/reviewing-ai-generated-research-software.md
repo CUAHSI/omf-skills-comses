@@ -1,8 +1,8 @@
 # Reviewing AI-generated research software: failure modes and verification
 
-AI-generated code should earn trust through evidence appropriate to its purpose. A successful build, passing test suite, or plausible result each answers a different question. None alone establishes that the software implements the intended scientific model.
+Trust in research software should rest on evidence suited to its purpose. A successful build, passing tests, and plausible results answer different questions. None alone shows that the software implements the intended scientific model.
 
-Language and framework choices influence which mistakes tools can detect. Reviewers still need to establish what the program should do, whether the checks exercise that behavior, and what remains uncertain. The same reasoning applies to human-written code; when using coding agents, it also applies to their changes to tests, configuration, dependencies, and documentation.
+Language and framework choices affect which mistakes tools can catch. Reviewers still need to establish what the program should do, whether the checks test that behavior, and what remains uncertain. This applies to human-written code and to changes an agent makes in tests, configuration, dependencies, and documentation.
 
 ## Start with the change and its consequences
 
@@ -14,7 +14,7 @@ Use repository instructions, model specifications, established conventions, and 
 
 ## Five sources of risk
 
-These categories help select checks to be made, and keep in mind that any single defect may involve several of them.
+These categories help reviewers choose checks. A defect may span more than one category.
 
 | Source of risk                | Review question                                                                                    | Useful response                                                                                                  |
 | ----------------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -92,7 +92,7 @@ Distinguish implementation verification from model validation. Correctly impleme
 
 Worked example: an agent changes an expected value
 
-This scenario is illustrative. The model and numbers are invented.
+This scenario uses a fictional model and numbers.
 
 A project maintains a Python agent-based model of shared-resource harvesting. Its ODD description states, under Process overview and scheduling, that harvesters act in a freshly randomized order each step and that every harvest immediately reduces the shared stock, so later harvesters see the depleted value. A coding agent is asked to upgrade the model to a newer Mesa release. It reports that the upgrade is complete and all tests pass.
 

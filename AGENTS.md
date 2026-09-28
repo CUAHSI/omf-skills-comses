@@ -57,6 +57,12 @@ The repository prioritizes methodological correctness, transparency, reviewabili
 
 As foundation models improve, this repository should become smaller, preserving only frontier community knowledge, standards, workflows, and practices that models do not consistently execute.
 
+## Audience and prose
+
+- Write reports, templates, and explanatory documentation for the people who will read and use them. Use plain language and explain necessary technical terms. Remove coding-agent shorthand that does not help the reader.
+- Write `SKILL.md` instructions for agents carrying out a task. They may be more compact and procedural, but must remain clear, specific, and readable by human maintainers. Do not use jargon merely to save words.
+- When a file serves both audiences, put the operational rule in `SKILL.md` and use direct, reader-facing wording in the output template. Avoid repeating the same guidance in both files.
+
 ---
 
 ## Required authoring reference (load when editing skills)
