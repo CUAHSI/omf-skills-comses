@@ -226,6 +226,7 @@ Load additional material only when needed:
 - `assets/DMP-TEMPLATE.md` when disseminating a funder-facing DMP from the FAIR Management Plan
 - `assets/SMP-TEMPLATE.md` when disseminating a funder-facing SMP from the FAIR Management Plan
 - `assets/maintenance-plan-template.md` when drafting or refreshing an operational maintenance plan from the FAIR Management Plan
+- `assets/hydroshare-assessment-process.md` when the research object is a HydroShare resource that contains a ModelProgram or ModelInstance aggregation (global and aggregation metadata collected with `hsclient`, mapped to CodeMeta, and assessed per CodeMeta record); it defines its own scope check, so load it for any HydroShare resource and follow its stop rule
 - `assets/provenance-manifest-template.json` when capturing object or workflow provenance
 - `assets/provenance-manifest-schema.json` when creating or validating an artifact provenance manifest
 

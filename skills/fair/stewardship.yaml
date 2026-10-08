@@ -4,10 +4,10 @@ skill:
   repository: https://github.com/openmodelingfoundation/skills
 subject-revision:
   algorithm: sha256-manifest-v1
-  digest: sha256:eb8842a83993fb81c54b829b42c0d7b2ee633279316914e5f026997b22e17262
+  digest: sha256:bd79a28981f28b31d7a49a84ab4aba8ff0b658b39c57676a08f4c7a6af30822d
   manifest:
   - path: SKILL.md
-    digest: sha256:2ee686bc98b259a080cbe15e20f1fe6443040abbee2c1a3d2ed216723afdad28
+    digest: sha256:5d97cbbc3997284c943c383d08b8e7440ccbdf408fa9be04f3bad091ba9df174
   - path: assets/DMP-TEMPLATE.md
     digest: sha256:ac1d764faf796e866453b61e0d312217f58784700cf1ee3741398cf789f804df
   - path: assets/FAIR-MP-TEMPLATE.md
@@ -16,6 +16,8 @@ subject-revision:
     digest: sha256:b5710b546f5dcb6a947327226d4db9f7ecb128cd9de7d4e58633f7b311294b73
   - path: assets/codemeta.json
     digest: sha256:ced3ec960ba2e3f63839a4ebc1acf606d02dce193757c38454f129c402ff07de
+  - path: assets/hydroshare-assessment-process.md
+    digest: sha256:038c994f41b7aa6b342ae9deb0b3421f5835c5487a37fca2e8ecd64877eb117e
   - path: assets/maintenance-plan-template.md
     digest: sha256:77ce3e170ec9776f63f3a9dd9eb755b36fcb04044b5e82e318eb604125b25f0e
   - path: assets/provenance-manifest-schema.json
@@ -27,7 +29,7 @@ subject-revision:
   - path: references/FAIR-RSE-CROSSWALK.md
     digest: sha256:6f3375746230883ed839f0f33ccb47989fbb79c217ccb7ad2b5a07d699795a2c
   - path: references/README.md
-    digest: sha256:18cf2994609c582e6f9ef51bf47de41d94e75d7d54a5be626271c873fd3a7696
+    digest: sha256:4b031ee9663a06fd51f5e6c4c99c7aa3b52403696bf70ab0976b3e010a7ca987
   - path: references/REFERENCES.md
     digest: sha256:78a2e2266900994980acd280290693dca79f57e326a717cfa9269f04408ba1cd
   include-overrides: []
@@ -51,6 +53,7 @@ guidance-provenance:
     - assets/FAIR-MP-TEMPLATE.md
     - assets/SMP-TEMPLATE.md
     - assets/codemeta.json
+    - assets/hydroshare-assessment-process.md
     - assets/maintenance-plan-template.md
     - assets/provenance-manifest-schema.json
     - assets/provenance-manifest-template.json

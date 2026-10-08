@@ -437,6 +437,63 @@
         "privacy_leak",
         "hallucination"
       ]
+    },
+    {
+      "id": 111,
+      "type": "core",
+      "prompt": "Run a FAIR assessment on this HydroShare resource, which contains a ModelProgram and a ModelInstance aggregation: https://www.hydroshare.org/resource/<resource-id>/. Use hsclient, download as little as possible, and map to CodeMeta first.",
+      "should_trigger": true,
+      "behavior": [
+        "Loads assets/hydroshare-assessment-process.md",
+        "Checks for a ModelProgram or ModelInstance aggregation before continuing",
+        "Collects global and aggregation metadata separately with hsclient and avoids bulk content download",
+        "Maps global metadata with the crosswalk and aggregation metadata with the proposed aggregation mapping, labelled as a proposal",
+        "Produces one CodeMeta record per in-scope aggregation and records whether each value is aggregation-level or inherited from the resource",
+        "Flags the availability-to-license mapping instead of treating it as a licence",
+        "Excludes author emails and does not add an unsupported review claim"
+      ],
+      "output": {
+        "description": "HydroShare FAIR assessment driven from the CodeMeta representation",
+        "must_include": [
+          "hsclient",
+          "CodeMeta",
+          "omf-artifacts/fair/fair-management-plan.md"
+        ],
+        "must_not_include": [
+          "full data download",
+          "author email addresses"
+        ]
+      },
+      "failure_modes": [
+        "hallucination",
+        "privacy_leak"
+      ]
+    },
+    {
+      "id": 112,
+      "type": "core",
+      "prompt": "Run a FAIR assessment on this HydroShare resource: https://www.hydroshare.org/resource/<resource-id>/. Its aggregations are all GeoFeature shapefiles and a FileSet. Use the HydroShare process.",
+      "should_trigger": true,
+      "behavior": [
+        "Loads assets/hydroshare-assessment-process.md and applies its scope check",
+        "Reports the observed aggregation types and states that the HydroShare model process does not apply because no ModelProgram or ModelInstance aggregation exists",
+        "Does not produce aggregation CodeMeta records or invent model metadata",
+        "Continues under the general FAIR workflow only if a FAIR assessment is still requested"
+      ],
+      "output": {
+        "description": "Scope-gate stop with observed aggregation types",
+        "must_include": [
+          "ModelProgram",
+          "ModelInstance",
+          "does not apply"
+        ],
+        "must_not_include": [
+          "invented model metadata"
+        ]
+      },
+      "failure_modes": [
+        "hallucination"
+      ]
     }
   ]
 }

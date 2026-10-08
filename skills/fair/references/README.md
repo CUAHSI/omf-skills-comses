@@ -14,6 +14,7 @@ This directory contains the normative references, operational guidance, and temp
 - `assets/DMP-TEMPLATE.md`
 - `assets/SMP-TEMPLATE.md`
 - `assets/codemeta.json`
+- `assets/hydroshare-assessment-process.md`
 
 ## Maintenance
 
