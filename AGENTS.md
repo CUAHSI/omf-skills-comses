@@ -186,6 +186,18 @@ rather than inventing another revision scheme.
 
 ---
 
+## Agent skills
+
+### Issue tracker
+
+Issues live as GitHub Issues in `CUAHSI/omf-skills-comses` (origin). See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context layout (one `GLOSSARY.md` + `docs/adr/` at the repo root). See `docs/agents/domain.md`.
+
+---
+
 ## Key documentation
 
 - `docs/agent-skills-creation-reference.md`: Canonical skill design + specification guide.
