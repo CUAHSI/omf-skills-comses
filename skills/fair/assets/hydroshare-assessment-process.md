@@ -4,7 +4,7 @@
 
 | Parameter | Value |
 |-----------|-------|
-| `RESOURCE_ID` | The 32-character HydroShare resource identifier (the last path segment of the resource URL). Required. |
+| `RESOURCE_URL` | The HydroShare resource URL (for example `https://www.hydroshare.org/resource/<32-char-id>/`). Required. Step 1 extracts `RESOURCE_ID` from it; every later step uses `RESOURCE_ID`. |
 | Output location | `omf-artifacts/fair/` |
 | Access mode | Anonymous, read-only |
 
@@ -45,13 +45,14 @@ flowchart TD
 
 ### Step 1: Open the resource and apply the scope gate
 
-1. Open the resource with `HydroShare().resource(RESOURCE_ID)`. This reads the resource map and the global metadata (`res.metadata`). It does not download data.
-2. Load the aggregations with `res.aggregations()`. Each aggregation exposes its own metadata as `agg.metadata`. Its `type` is an `AggregationType`. The in-scope values are `ModelProgram` (`AggregationType.ModelProgramAggregation`) and `ModelInstance` (`AggregationType.ModelInstanceAggregation`). Other values (`Generic`, `FileSet`, `GeoFeature`, `GeoRaster`, `NetCDF`, `TimeSeries`, `RefTimeseries`, `CSV`) are out of scope.
+1. Extract `RESOURCE_ID` from `RESOURCE_URL`: the last 32-character path segment (strip any trailing slash or path beyond it first). Reject the input and stop if no 32-character segment is found.
+2. Open the resource with `HydroShare().resource(RESOURCE_ID)`. This reads the resource map and the global metadata (`res.metadata`). It does not download data.
+3. Load the aggregations with `res.aggregations()`. Each aggregation exposes its own metadata as `agg.metadata`. Its `type` is an `AggregationType`. The in-scope values are `ModelProgram` (`AggregationType.ModelProgramAggregation`) and `ModelInstance` (`AggregationType.ModelInstanceAggregation`). Other values (`Generic`, `FileSet`, `GeoFeature`, `GeoRaster`, `NetCDF`, `TimeSeries`, `RefTimeseries`, `CSV`) are out of scope.
    - `hsclient` has no way to read an aggregation's type without loading its metadata, so this call requests one small metadata file per aggregation (in a thread pool). Resources with hundreds of aggregations make hundreds of requests. Log the aggregation count and elapsed time. If the count is large, tell the user before proceeding.
    - Filter by `agg.metadata.type` in Python rather than relying on the keyword filters of `aggregations()`.
    - Aggregations can contain further aggregations (every aggregation has its own `aggregations()` method, for example FileSets). Descend into them and de-duplicate by `agg.metadata.url`.
    - Use public attributes (`agg.metadata`, `agg.files()`). Do not use `_retrieved_metadata` or other underscore attributes. They are unset until the metadata has been loaded.
-3. Decide scope.
+4. Decide scope.
    - **In scope:** at least one aggregation of type `ModelProgram` or `ModelInstance`. Continue.
    - **Not in scope:** none found. **Stop.** Report the aggregation types and counts that were observed, state that this process does not apply, and write no artifacts from it. If a FAIR Management Plan is being produced for other reasons, add the resource to the Research Object Inventory with the note "no ModelProgram or ModelInstance aggregation; HydroShare model process not applied", and continue under the skill's general workflow.
    - **Cannot decide:** the call raised an error. Aggregation metadata that fails `hsmodels` validation can raise `pydantic.ValidationError` from the whole call, because `hsclient` loads every aggregation's metadata to build typed aggregations (observed in the upstream query script, which catches it). Record the scope as `Unknown`, report the error, and do not guess. A 401 means the resource is not anonymously readable (see Step 0).
@@ -217,6 +218,15 @@ Analyse each record separately. A ModelProgram, a ModelInstance and the resource
 
 For each finding, name the scope the owners would edit to fix it: the resource metadata, or the metadata of a named aggregation.
 
+**5e. Actionable recommendations.** Derive one recommendation for each absent or empty CodeMeta property found in 5a, each negative or not-evidenced indicator from 5b, and each 5d supplementary observation that names a concrete gap. Every recommendation states:
+
+- the FAIR sub-criterion it addresses (the 5a metric, or the 5b indicator);
+- the CodeMeta property involved;
+- the scope to edit: the resource (whole-resource metadata) or a named aggregation (by title and `url`);
+- the concrete HydroShare field to add or correct to close the gap.
+
+Drop a recommendation only when the gap is already reported as a known limit of the source metadata (issue E) or as not applicable for the record's type (5b). Group recommendations by scope in `stewardship-checklist.md` (Step 6) so resource owners and aggregation owners each see only what they can act on.
+
 ### Step 6: Produce artifacts
 
 Write under `omf-artifacts/fair/`:
@@ -228,7 +238,7 @@ Write under `omf-artifacts/fair/`:
 | `codemeta-resource-strict.json`, `codemeta-aggregation-<n>.json` | Yes | Derived from the snapshot. |
 | `provenance-manifest.json` | Yes | From `assets/provenance-manifest-template.json`, checked against the schema. |
 | `license-inventory.md` | Yes | One row per object. The resource licence and each aggregation licence are listed separately, and differences are flagged. Upstream source terms stay `Unknown` unless stated in the metadata. |
-| `stewardship-checklist.md` | Optional | An actionable list for the resource owners, grouped by the scope to edit. |
+| `stewardship-checklist.md` | Yes | The actionable recommendations from 5e, grouped by scope (resource vs. a named aggregation). Each entry cites its FAIR sub-criterion, CodeMeta property, and the HydroShare field to change. |
 | `dmp.md` or `smp.md` | Only if a funder requires it | Derive from the FAIR Management Plan. |
 
 Provenance manifest:
@@ -243,6 +253,7 @@ Provenance manifest:
 - Names, identifiers, licences and dates agree across all artifacts, or each difference is listed as a conflict.
 - Every ModelInstance-to-ModelProgram link in the records matches the inventory.
 - Other artifacts refer to the inventory and do not redefine objects.
+- Every recommendation in `stewardship-checklist.md` traces back to a finding in 5a, 5b or 5d; no recommendation introduces a gap that wasn't scored or observed.
 - Every claim carries an `Observed`, `Inferred` or `Unknown` tag. Every inherited value is `Inferred`.
 - Nothing implies verification that did not happen. For example, do not state that a DOI resolves unless it was resolved during the run.
 - Model structure, parameterization and calibration go to `omfa`. Narrative documentation of the model goes to `document`. Neither is judged here.
