@@ -45,6 +45,37 @@ The only exception is when modifying the `Makefile` or container configuration i
 
 ---
 
+## Commands allowed without approval
+
+Agents may run the following commands without asking the user first. They only read state from the repository, GitHub, or Jira, or update remote-tracking refs (`git fetch`); they never change the working tree, commits, remotes, pull requests, or work items.
+
+### Git
+
+- `git status`
+- `git fetch`
+- `git log`
+- `git show`
+- `git diff`
+
+### GitHub (`gh`)
+
+- `gh pr view`
+- `gh pr list`
+- `gh pr diff`
+
+### Jira (`acli`)
+
+- `acli jira workitem view`
+- `acli jira workitem search`
+
+### Usage rules
+
+Any flags and arguments are allowed, as long as they keep the command read-only (for example, no `git diff --output=<file>` and no `gh pr view --web`). To keep the terminal from opening an interactive pager, write `git --no-pager log`, `git --no-pager show`, and `git --no-pager diff`, prefer `git --no-optional-locks status`, and prefix `acli` commands with `PAGER=cat`.
+
+Every other command, including any that commits, pushes, rewrites history, or modifies GitHub or Jira, follows the normal approval flow.
+
+---
+
 ## Agent handoffs
 
 When a task spans multiple agent sessions or requires explicit transfer of context, place concise handoff notes under `docs/handoffs/`.
@@ -190,7 +221,11 @@ rather than inventing another revision scheme.
 
 ### Issue tracker
 
-Issues live as GitHub Issues in `CUAHSI/omf-skills-comses` (origin). See `docs/agents/issue-tracker.md`.
+Tickets live in Jira (project `CAM`, under Objective `CAM-209`, labels `COMSES,OMF-Skills`) via `acli`; GitHub `CUAHSI/omf-skills-comses` is for source code and PRs only. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default vocabulary, applied as Jira labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
 
 ### Domain docs
 
