@@ -175,6 +175,73 @@ See the [documentation index](docs/README.md) to find current contracts and guid
 - **Authoring Reference**: [docs/agent-skills-creation-reference.md](docs/agent-skills-creation-reference.md)
 - **New Skill Template**: [docs/SKILL-TEMPLATE.md](docs/SKILL-TEMPLATE.md)
 
+### Issue tracking: Jira and GitHub setup (maintainers)
+
+Work on this repository is tracked in Jira and the code is managed on GitHub:
+
+- **Jira** (project `CAM` on `cuahsi.atlassian.net`, Objective `CAM-209`, labels `COMSES` and `OMF-Skills`) holds all tickets and specs.
+- **GitHub** (`CUAHSI/omf-skills-comses`) is used only for source code and pull requests. Do not open GitHub issues.
+
+Coding agents follow [docs/agents/issue-tracker.md](docs/agents/issue-tracker.md), which lists the exact commands, ticket hierarchy, branch naming, and PR conventions. The setup below gives you and your agent the access those commands need.
+
+#### 1. Get access
+
+- Write access to the [`CUAHSI/omf-skills-comses`](https://github.com/CUAHSI/omf-skills-comses) GitHub repository.
+- A CUAHSI Atlassian account with permission to create and edit work items in the Jira `CAM` project.
+
+#### 2. Install the CLIs
+
+| Tool | Purpose | Install (macOS, Homebrew) | Other platforms |
+| --- | --- | --- | --- |
+| `gh` | GitHub pull requests | `brew install gh` | [cli.github.com](https://cli.github.com/) |
+| `acli` | Jira work items | `brew tap atlassian/homebrew-acli && brew install acli` | [Install Atlassian CLI](https://developer.atlassian.com/cloud/acli/guides/install-acli/) |
+| `jq` | Optional: parse `--json` output | `brew install jq` | [jqlang.org](https://jqlang.org/download/) |
+
+#### 3. Authenticate
+
+```bash
+# GitHub: choose GitHub.com and HTTPS, then log in through the browser
+gh auth login
+
+# Jira: log in through the browser and choose the cuahsi.atlassian.net site
+acli jira auth login --web
+```
+
+If browser login is not possible (for example, on a remote machine), create an [Atlassian API token](https://id.atlassian.com/manage-profile/security/api-tokens) and pass it on standard input:
+
+```bash
+acli jira auth login --site cuahsi.atlassian.net --email you@cuahsi.org --token < token.txt
+```
+
+#### 4. Verify
+
+Run these from the repository root. Each command should succeed without prompting.
+
+```bash
+gh auth status
+gh pr list --state all --limit 5
+
+export PAGER=cat
+acli jira auth status
+acli jira workitem search --jql "project = CAM AND labels = OMF-Skills AND statusCategory != Done ORDER BY cf[10116] ASC" --fields "key,issuetype,summary,status" --csv
+```
+
+The last command should list this repository's open Jira work items.
+
+> [!IMPORTANT]
+> Set `PAGER=cat` (or `export PAGER=cat`) before running `acli`. Without it, `acli` opens output in an interactive pager, which makes coding agents hang. A prefix such as `PAGER=cat cmd1; cmd2` applies only to `cmd1`.
+
+#### 5. Allow your coding agent to use the CLIs
+
+Agents run `gh` and `acli` with your credentials. If your agent runs commands in a sandbox, allow network access to `github.com`, `api.github.com`, and `cuahsi.atlassian.net`. Also allow it to read the CLIs' credential stores (`gh` uses the system keychain or `~/.config/gh/`).
+
+#### Day-to-day workflow
+
+1. Pick or create a Jira Story under the relevant Epic in `CAM-209`.
+2. Branch from the latest `main` using the Jira key: `git checkout -b CAM-1234-short-description`.
+3. Open the pull request against `main` with the key in the title: `gh pr create --base main --title "CAM-1234: ..."`.
+4. Move the Story to `In Review`: `acli jira workitem transition --key CAM-1234 --status "In Review" --yes`.
+
 ## Roadmap
 
 | Available                                      | Planned                             |
