@@ -14,8 +14,10 @@ description: |
   Triggers include making research objects FAIR, reproducible, citable,
   reusable, publication- or archive-ready; creating FAIR metadata (e.g.
   codemeta.json, CITATION.cff, RO-Crate); packaging or archiving
-  a repository, dataset, or model; and developing FAIR, data, software, or
-  maintenance plans.
+  a repository, dataset, or model; developing FAIR, data, software, or
+  maintenance plans; and evaluating the FAIR score or FAIRness of a HydroShare
+  resource URL (a ModelProgram or ModelInstance) with actionable, metadata-only
+  recommendations for improvement.
 
   Expected output: a FAIR Management Plan as the sole canonical stewardship
   document, with appropriate metadata, provenance, reproducibility, packaging,
@@ -226,7 +228,7 @@ Load additional material only when needed:
 - `assets/DMP-TEMPLATE.md` when disseminating a funder-facing DMP from the FAIR Management Plan
 - `assets/SMP-TEMPLATE.md` when disseminating a funder-facing SMP from the FAIR Management Plan
 - `assets/maintenance-plan-template.md` when drafting or refreshing an operational maintenance plan from the FAIR Management Plan
-- `assets/hydroshare-assessment-process.md` when the research object is a HydroShare resource that contains a ModelProgram or ModelInstance aggregation (global and aggregation metadata collected with `hsclient`, mapped to CodeMeta, and assessed per CodeMeta record); it defines its own scope check, so load it for any HydroShare resource and follow its stop rule
+- `assets/hydroshare-assessment-process.md` when the user gives a HydroShare resource URL and asks for its FAIR score, FAIRness, or recommendations to improve it, or when the research object is otherwise identified as a HydroShare resource that contains a ModelProgram or ModelInstance aggregation (global and aggregation metadata collected with `hsclient`, mapped to CodeMeta, and assessed per CodeMeta record); it defines its own scope check, so load it for any HydroShare resource and follow its stop rule
 - `assets/provenance-manifest-template.json` when capturing object or workflow provenance
 - `assets/provenance-manifest-schema.json` when creating or validating an artifact provenance manifest
 
