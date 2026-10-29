@@ -61,17 +61,40 @@ List the current set with `acli jira workitem search --jql "parent = CAM-209 AND
 | Start date    | `customfield_10504` (not `Target start`, which CAM does not use)    |
 | Rank field    | `customfield_10116`                                                 |
 | Active sprint | `acli jira board list-sprints --id 18 --state active --json \| cat` |
-| Credentials   | `~/.jira/netrc` (see below)                                         |
+| Credentials   | `~/.jira/netrc` (see **Credentials** below)                         |
 
-Credentials live in a netrc file so the API token never appears in commands, shell history, or agent output. Never print, read into context, or copy this file. If it is missing, ask the user to create it; do not ask them to paste the token.
+### Credentials
 
-```text
-machine cuahsi.atlassian.net login <atlassian-email> password <api-token>
-```
+Credentials live in a netrc file so the API token never appears in commands, shell history, or agent output. Never print, read into context, or copy this file. If it is missing, give the user the setup steps below and wait; do not ask them to paste the token.
 
-The token is a classic (unscoped) token from <https://id.atlassian.com/manage-profile/security/api-tokens>; scoped tokens require a different base URL. The file must be `chmod 600`.
+One-time setup, done by the user:
 
-- **Check credentials** (read-only): `curl -sS --netrc-file ~/.jira/netrc https://cuahsi.atlassian.net/rest/api/3/myself`. Expect HTTP 200; print only `displayName`, never the full response headers.
+1. Create a classic API token at <https://id.atlassian.com/manage-profile/security/api-tokens> with **Create API token**, not **Create API token with scopes** (scoped tokens need a different base URL and separate sprint permissions).
+2. Create a private folder and an empty file only the user can read:
+
+   ```sh
+   mkdir -p ~/.jira && chmod 700 ~/.jira
+   touch ~/.jira/netrc && chmod 600 ~/.jira/netrc
+   open -e ~/.jira/netrc
+   ```
+
+   Use an editor (`open -e`, `nano`, `vim`), not `echo`, so the token stays out of shell history.
+
+3. Add one line, replacing the email and token:
+
+   ```text
+   machine cuahsi.atlassian.net login <atlassian-email> password <api-token>
+   ```
+
+   `machine` is the bare host (no `https://`, no trailing `/`), `login` is the Atlassian sign-in email, and `password` is the token exactly as issued, with no quotes. End the file with a newline.
+
+Before the first REST call, check the file without reading it:
+
+- **Permissions**: `ls -l ~/.jira/netrc` must start with `-rw-------`. If it doesn't, ask the user to run `chmod 600 ~/.jira/netrc`.
+- **Login** (read-only): `curl -sS --netrc-file ~/.jira/netrc https://cuahsi.atlassian.net/rest/api/3/myself`. Expect HTTP 200 and print only `displayName`. HTTP 401 means the email, token, or `machine` host is wrong.
+
+### Requests
+
 - **Set a due date**: `curl -sS -w "HTTP %{http_code}\n" --netrc-file ~/.jira/netrc -X PUT -H "Content-Type: application/json" -d '{"fields":{"duedate":"2026-11-06"}}' https://cuahsi.atlassian.net/rest/api/3/issue/<KEY>`. Success is HTTP 204. Send `"duedate":null` to clear it.
 - **Set a start date**: same request with `-d '{"fields":{"customfield_10504":"2026-10-29"}}'`. Every scheduled work item needs both a start date and a due date; set them together.
 - **Before overwriting** an existing start or due date, check the item's changelog (`GET /rest/api/3/issue/<KEY>/changelog`) and tell the user if a person set it.
