@@ -4,7 +4,7 @@ Tickets and specs for this repo live in Jira, project `CAM`, on `cuahsi.atlassia
 
 `CAM` is shared by every Compute and Modeling team project, and the `COMSES` tree is shared with other COMSES repos. Only touch work items under Objective `CAM-209` that carry the `OMF-Skills` label, plus new items you create under the rules below.
 
-Prefix every `acli` command with `PAGER=cat` (or `export PAGER=cat`), otherwise output opens in an interactive pager and hangs. In a chain like `a; b`, the prefix applies only to `a`: use `export PAGER=cat;` first.
+Prefix every `acli` command with `PAGER=cat` (or `export PAGER=cat`), otherwise output opens in an interactive pager and hangs. In a chain like `a; b`, the prefix applies only to `a`: use `export PAGER=cat;` first. `acli jira workitem view` ignores `PAGER` and still opens a pager; pipe it through `| cat` instead (e.g. `acli jira workitem view <KEY> --json | cat`).
 
 ## Hierarchy
 
@@ -46,7 +46,38 @@ List the current set with `acli jira workitem search --jql "parent = CAM-209 AND
 - **Apply / remove labels**: `acli jira workitem edit --key <KEY> --labels "..." --yes` / `--remove-labels "..." --yes`. Labels are created on first use.
 - **Change status**: `acli jira workitem transition --key <KEY> --status "In Progress" --yes`.
 - **Close**: comment with the reason, then transition to `Done` (resolved) or `Won't Do` (declined).
-- **Link**: `acli jira workitem link create --out <BLOCKER> --in <BLOCKED> --type Blocks --yes`. Other types: `Relates`, `Duplicate`. List with `acli jira workitem link list --key <KEY> --json`.
+- **Link**: `acli jira workitem link create --out <BLOCKED> --in <BLOCKER> --type Blocks --yes` creates "`<BLOCKER>` blocks `<BLOCKED>`". The flag names are the reverse of what they suggest, and acli's success message (`<BLOCKED> Blocks <BLOCKER>`) describes the opposite of what Jira stores, so read the link back after creating it (see **Read links** below). Other types: `Relates`, `Duplicate`. The REST equivalent is `POST /rest/api/3/issueLink` with `{"type":{"name":"Blocks"},"inwardIssue":{"key":"<BLOCKER>"},"outwardIssue":{"key":"<BLOCKED>"}}`; delete a link with `DELETE /rest/api/3/issueLink/<LINK-ID>`. Credentials for REST calls are described under **Sprints, start dates, and due dates** below.
+- **Read links**: `curl -sS --netrc-file ~/.jira/netrc "https://cuahsi.atlassian.net/rest/api/3/issue/<KEY>?fields=issuelinks"`. For a `Blocks` link, an `inwardIssue` entry means `<KEY>` is blocked by that item, and an `outwardIssue` entry means `<KEY>` blocks it. Do not rely on `acli jira workitem link list`: it omits the other item's key for half of the links, so it cannot show direction.
+- **Read any field**: `acli jira workitem view <KEY> --fields "duedate,customfield_10115" --json | cat`. `view` reads any system or custom field, but `edit` can only write the fields listed below.
+
+## Sprints, start dates, and due dates (Jira REST API)
+
+`acli` (checked at 1.3.39) cannot set start dates, due dates, sprints, or any custom field on an existing work item. `acli jira workitem edit` only accepts `summary`, `description`, `assignee`, `type`, and labels; `--from-json` rejects other keys (`unknown field "duedate"`, `unknown field "fields"`) and there is no `--field` flag. Use the Jira REST API with `curl` for these instead.
+
+| Item          | Value                                                               |
+| ------------- | ------------------------------------------------------------------- |
+| Board         | `CAM board`, id `18` (scrum)                                        |
+| Sprint field  | `customfield_10115`                                                 |
+| Start date    | `customfield_10504` (not `Target start`, which CAM does not use)    |
+| Rank field    | `customfield_10116`                                                 |
+| Active sprint | `acli jira board list-sprints --id 18 --state active --json \| cat` |
+| Credentials   | `~/.jira/netrc` (see below)                                         |
+
+Credentials live in a netrc file so the API token never appears in commands, shell history, or agent output. Never print, read into context, or copy this file. If it is missing, ask the user to create it; do not ask them to paste the token.
+
+```text
+machine cuahsi.atlassian.net login <atlassian-email> password <api-token>
+```
+
+The token is a classic (unscoped) token from <https://id.atlassian.com/manage-profile/security/api-tokens>; scoped tokens require a different base URL. The file must be `chmod 600`.
+
+- **Check credentials** (read-only): `curl -sS --netrc-file ~/.jira/netrc https://cuahsi.atlassian.net/rest/api/3/myself`. Expect HTTP 200; print only `displayName`, never the full response headers.
+- **Set a due date**: `curl -sS -w "HTTP %{http_code}\n" --netrc-file ~/.jira/netrc -X PUT -H "Content-Type: application/json" -d '{"fields":{"duedate":"2026-11-06"}}' https://cuahsi.atlassian.net/rest/api/3/issue/<KEY>`. Success is HTTP 204. Send `"duedate":null` to clear it.
+- **Set a start date**: same request with `-d '{"fields":{"customfield_10504":"2026-10-29"}}'`. Every scheduled work item needs both a start date and a due date; set them together.
+- **Before overwriting** an existing start or due date, check the item's changelog (`GET /rest/api/3/issue/<KEY>/changelog`) and tell the user if a person set it.
+- **Add work items to a sprint**: `curl -sS -w "HTTP %{http_code}\n" --netrc-file ~/.jira/netrc -X POST -H "Content-Type: application/json" -d '{"issues":["<KEY>","<KEY>"]}' https://cuahsi.atlassian.net/rest/agile/1.0/sprint/<SPRINT-ID>/issue`. Success is HTTP 204. Add Stories, not Epics.
+- **Verify** every write by reading it back with `acli jira workitem view <KEY> --fields "customfield_10504,duedate,customfield_10115" --json | cat`.
+- When setting due dates for dependent Stories, keep them consistent with `Blocks` links: a blocker's due date comes on or before the start date of every item it blocks.
 
 ## Branches
 
@@ -76,7 +107,7 @@ Used by `/wayfinder`. The **map** is a single Epic with **child** Stories as tic
 
 - **Map**: an Epic under `CAM-209`, labelled `COMSES,OMF-Skills,wayfinder:map`, holding the Notes / Decisions-so-far / Fog body.
 - **Child ticket**: a Story with `--parent <map-epic>`, labelled `COMSES,OMF-Skills,wayfinder:<type>` (`research`/`prototype`/`grilling`/`task`). Once claimed, it's assigned to the driving dev.
-- **Blocking**: a `Blocks` link (`--out <blocker> --in <blocked>`). A ticket is unblocked when every inward `Blocks` link points at an item in `Done` or `Won't Do`.
-- **Frontier query**: `acli jira workitem search --jql "parent = <map> AND statusCategory != Done AND assignee is EMPTY ORDER BY cf[10116] ASC" --csv`, then drop any with an open blocker (check `acli jira workitem link list --key <KEY> --json`); first in Rank order wins.
+- **Blocking**: a `Blocks` link, created as in **Link** above. A ticket is unblocked when every item it is blocked by (each `inwardIssue` on its `Blocks` links) is in `Done` or `Won't Do`.
+- **Frontier query**: `acli jira workitem search --jql "parent = <map> AND statusCategory != Done AND assignee is EMPTY ORDER BY cf[10116] ASC" --csv`, then drop any with an open blocker (check as in **Read links** above); first in Rank order wins.
 - **Claim**: `acli jira workitem assign --key <KEY> --assignee @me --yes`, the session's first write. Then transition to `In Progress`.
 - **Resolve**: comment with the answer, transition to `Done`, then append a context pointer (gist + key) to the map Epic's Decisions-so-far.
