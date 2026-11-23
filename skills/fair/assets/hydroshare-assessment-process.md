@@ -2,6 +2,8 @@
 
 > Process asset for the `fair` skill. Use it when the research object is a HydroShare resource **that contains a ModelProgram or ModelInstance aggregation**. It describes the process only. It is not an assessment result, and nothing here has been run against any particular resource.
 
+> **Maintained ModelProgram commands (CAM-1490).** `skills/fair/scripts/hydroshare_collect.py` and `skills/fair/scripts/hydroshare_map.py` provide a maintained, tested command-line path for the collection and mapping steps below, for resources whose qualifying aggregations are ModelProgram. Run the collector with a resource URL or id to write a source snapshot (`--out snapshot.json`), then run the mapper against that snapshot (`--out-dir <dir>`) to produce a standalone resource CodeMeta record and one CodeMeta record per ModelProgram aggregation, with a companion mapping-provenance report. Both commands are offline-tested (`make test-fair-hydroshare`); the mapper itself never needs network access. **Interim limitations:** ModelInstance aggregations are inventoried in the snapshot but do not yet receive a CodeMeta record (tracked as CAM-1492), and parent-to-aggregation enrichment (author/license/name/description inheritance) is not yet applied (tracked as CAM-1491). Until full adoption (CAM-1493), this is the first supported end-to-end path, not a replacement for the rest of this process — continue following the steps below for anything these commands don't yet cover.
+
 | Parameter | Value |
 |-----------|-------|
 | `RESOURCE_URL` | The HydroShare resource URL (for example `https://www.hydroshare.org/resource/<32-char-id>/`). Required. Step 1 extracts `RESOURCE_ID` from it; every later step uses `RESOURCE_ID`. |
