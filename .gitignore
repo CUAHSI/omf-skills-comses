@@ -60,3 +60,6 @@ thumbs.db
 
 # Git
 .git/
+
+# ignore tmp directory
+tmp/
