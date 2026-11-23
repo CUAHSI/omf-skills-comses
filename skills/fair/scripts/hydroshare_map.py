@@ -1,10 +1,19 @@
 #!/usr/bin/env python3
-"""Offline mapper from a HydroShare source snapshot to CodeMeta (CAM-1490).
+"""Offline mapper from a HydroShare source snapshot to CodeMeta (CAM-1490, CAM-1491).
 
 Reads a snapshot produced by hydroshare_collect.py (no network access) and
 writes a standalone resource CodeMeta record plus one aggregation CodeMeta
 record per ModelProgram aggregation, with a companion provenance report
 identifying each mapped value's source scope, source field, and rule.
+
+Aggregation records are enriched through an approved, field-specific parent
+(resource) inheritance allowlist (CAM-1491): authors, rights/license, title,
+and a provisional description fallback may inherit from the parent resource
+when the aggregation value is absent. Every other field (identifier, dates,
+version, repository, website, languages, operating systems, keywords) stays
+aggregation-only. Inherited values are flagged in the provenance report rather
+than presented as direct declarations, and generic titles are reported as a
+quality issue rather than silently rewritten.
 
 ModelInstance aggregations are inventoried in the snapshot but not yet mapped
 to CodeMeta in this slice (see CAM-1492); this mapper reports how many were
@@ -89,14 +98,33 @@ def map_resource(global_scope: dict) -> tuple[dict, list[dict]]:
     return mapping.codemeta, mapping.provenance
 
 
-def map_aggregation(agg: dict) -> tuple[dict, list[dict]]:
-    """Map one ModelProgram aggregation. No parent-metadata fallback (CAM-1491)."""
-    metadata = agg.get("metadata", {})
-    mapping = _Mapping("aggregation")
+# Approved parent-inheritance allowlist (CAM-1491): authors, rights/license,
+# title/name, and a provisional description fallback. Everything else stays
+# aggregation-only; this is not a general resource-to-aggregation merge.
+GENERIC_TITLE_VALUES = {"model program", "model instance", "untitled", "untitled resource"}
 
-    mapping.put("name", "title", metadata.get("title"))
+
+def _is_generic_title(title: str | None) -> bool:
+    return bool(title) and title.strip().lower() in GENERIC_TITLE_VALUES
+
+
+def map_aggregation(agg: dict, parent_metadata: dict | None = None) -> tuple[dict, list[dict], list[dict]]:
+    """Map one ModelProgram/ModelInstance aggregation, with approved parent inheritance.
+
+    `parent_metadata` is the resource-level metadata dict (global scope). Direct
+    aggregation values always take precedence; only authors, rights, title, and
+    a provisional description may fall back to the parent when the aggregation
+    value is absent. Identifier, dates, version, repository, website,
+    languages, operating systems, and keywords are aggregation-only and never
+    inherit from the parent. Returns (codemeta, provenance, quality_issues).
+    """
+    metadata = agg.get("metadata", {})
+    parent_metadata = parent_metadata or {}
+    mapping = _Mapping("aggregation")
+    quality_issues: list[dict] = []
+
+    # Aggregation-only fields: never fall back to parent.
     mapping.put("keywords", "subjects", metadata.get("subjects"))
-    mapping.put("license", "rights", _rights_to_license(metadata.get("rights")))
     mapping.put("identifier", "url", agg.get("url") or metadata.get("url"))
     mapping.put("datePublished", "release_date", metadata.get("release_date"))
     mapping.put("version", "version", metadata.get("version"))
@@ -104,10 +132,43 @@ def map_aggregation(agg: dict) -> tuple[dict, list[dict]]:
     mapping.put("url", "website", metadata.get("website"))
     mapping.put("programmingLanguage", "programming_languages", metadata.get("programming_languages"))
     mapping.put("operatingSystem", "operating_systems", metadata.get("operating_systems"))
+
+    title = metadata.get("title")
+    if title:
+        mapping.put("name", "title", title)
+        if _is_generic_title(title):
+            quality_issues.append({"field": "name", "issue": "generic-title", "value": title})
+    elif parent_metadata.get("title"):
+        mapping.put("name", "title", parent_metadata.get("title"), rule="inherited-parent")
+
     creators = metadata.get("creators") or []
     if creators:
         mapping.put("author", "creators", [_creator_to_codemeta(c) for c in creators])
-    return mapping.codemeta, mapping.provenance
+    else:
+        parent_creators = parent_metadata.get("creators") or []
+        if parent_creators:
+            mapping.put(
+                "author", "creators", [_creator_to_codemeta(c) for c in parent_creators], rule="inherited-parent"
+            )
+
+    rights = metadata.get("rights")
+    if rights:
+        mapping.put("license", "rights", _rights_to_license(rights))
+    elif parent_metadata.get("rights"):
+        mapping.put("license", "rights", _rights_to_license(parent_metadata.get("rights")), rule="inherited-parent")
+
+    # hsmodels ModelProgram/ModelInstance aggregation metadata has no abstract
+    # field today, so this fallback is the only current description source;
+    # "abstract" is checked first so a future direct field still wins.
+    description = metadata.get("abstract")
+    if description:
+        mapping.put("description", "abstract", description)
+    elif parent_metadata.get("abstract"):
+        mapping.put(
+            "description", "abstract", parent_metadata.get("abstract"), rule="inherited-parent-provisional"
+        )
+
+    return mapping.codemeta, mapping.provenance, quality_issues
 
 
 def map_snapshot(snapshot: dict) -> dict:
@@ -119,6 +180,7 @@ def map_snapshot(snapshot: dict) -> dict:
             f"Recorded errors: {collection.get('errors')}"
         )
 
+    global_metadata = snapshot.get("global", {}).get("metadata", {})
     resource_codemeta, resource_provenance = map_resource(snapshot.get("global", {}))
 
     aggregation_records = []
@@ -129,8 +191,10 @@ def map_snapshot(snapshot: dict) -> dict:
             continue
         if agg.get("type") != "ModelProgram":
             continue
-        codemeta, provenance = map_aggregation(agg)
-        aggregation_records.append({"url": agg.get("url"), "codemeta": codemeta, "provenance": provenance})
+        codemeta, provenance, quality_issues = map_aggregation(agg, global_metadata)
+        aggregation_records.append(
+            {"url": agg.get("url"), "codemeta": codemeta, "provenance": provenance, "quality_issues": quality_issues}
+        )
 
     return {
         "resource": {"codemeta": resource_codemeta, "provenance": resource_provenance},
@@ -142,6 +206,11 @@ def map_snapshot(snapshot: dict) -> dict:
                 "these aggregations were inventoried but did not receive a CodeMeta record."
                 if deferred_modelinstance_count
                 else None
+            ),
+            "description_inheritance_policy": (
+                "provisional: parent-abstract fallback for aggregation description is an interim "
+                "policy pending review of whether a resource abstract accurately describes each "
+                "aggregation, especially in multi-model resources (see CAM-1490 spec Further Notes)."
             ),
         },
     }
