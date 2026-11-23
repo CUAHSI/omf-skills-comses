@@ -21,6 +21,7 @@ help:
 	@echo "  make container-validate  Run the full validation suite inside the supported container"
 	@echo "  make validate-citation  Validate the repository CITATION.cff metadata"
 	@echo "  make test              Run repository tests / evals only (no lint or format)"
+	@echo "  make test-fair-hydroshare  Run offline tests for the maintained HydroShare collector/mapper"
 	@echo "  make validate-provenance  Validate the OMF provenance schema and template"
 	@echo "  make validate-stewardship Validate skill stewardship records and subject digests"
 	@echo "  make refresh-stewardship  Refresh subject manifests after skill-content changes"
@@ -54,12 +55,17 @@ validate-citation:
 
 # ---- tests (no lint, no format) ----
 .PHONY: test
-test: validate-evals validate-provenance validate-stewardship cross validate-skills
+test: validate-evals validate-provenance validate-stewardship cross validate-skills test-fair-hydroshare
 
 # ---- individual validation targets ----
 .PHONY: validate-skills
 validate-skills:
 	@$(TOOLS_RUN) $(SCRIPTS)/validate_individual_skills.py
+
+# ---- offline regression tests for the maintained HydroShare collector/mapper ----
+.PHONY: test-fair-hydroshare
+test-fair-hydroshare:
+	@$(TOOLS_RUN) -m unittest discover -s skills/fair/scripts/tests -p "test_*.py"
 
 .PHONY: validate-evals
 validate-evals:
